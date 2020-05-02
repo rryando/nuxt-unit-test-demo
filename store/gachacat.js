@@ -1,33 +1,31 @@
 const initState = {
-  myCat: [],
-  currentGachaCat: '/cover.jpg',
+  myCats: [],
+  currentGachaCat: {
+    id: '0',
+    imgUrl: '/cover.jpg',
+    description: '',
+    name: '',
+    status: {
+      'Adaptability': 0,
+      'Affection Level': 0,
+      'Social Needs': 0,
+      'Stanger Friendly': 0,
+      'Rarity': 0,
+    }
+  },
 }
 
 const initGetters = {
-  getRandomedCat: state => state.currentGachaCat
+  getGachaedCat: state => state.currentGachaCat,
+  listOfMyCats: state => state.myCats,
 }
 
 const mutations = {
-  setCurrentGachaCat(state, imgData) {
-    state.currentGachaCat = imgData
+  setCurrentGachaCat(state, catData) {
+    state.currentGachaCat = catData
   },
-  saveCat(state, imgData) {
-    const catBreedsData = imgData.breeds[0]
-    const catData = {
-      id: imgData.id,
-      imgUrl: imgData.url,
-      description: catBreedsData.description,
-      name: catBreedsData.name,
-      status: {
-        'Adaptability': catBreedsData.adaptability,
-        'Affection Level': catBreedsData.affection_level,
-        'Social Needs': catBreedsData.social_needs,
-        'Stanger Friendly': catBreedsData.stranger_friendly,
-        'Rarity': catBreedsData.rare,
-      }
-    }
-
-    state.myCat.push(catData)
+  saveCat(state, catData) {
+    state.myCats.push(catData)
   }
 }
 
@@ -35,8 +33,29 @@ const actions = {
   async fetchRandomCat({commit}) {
     const response = await this.$axios.get('https://api.thecatapi.com/v1/images/search?has_breeds=1&size=small')
     const { data } = response
-    commit('setCurrentGachaCat', data[0])
+    const { breeds } = data[0]
+    const catData = data[0]
+    const catBreeds = breeds[0]
+
+    const formedCatData = {
+      id: catData.id,
+      imgUrl: catData.url,
+      description: catBreeds.description,
+      name: catBreeds.name,
+      status: {
+        'Adaptability': catBreeds.adaptability,
+        'Affection Level': catBreeds.affection_level,
+        'Social Needs': catBreeds.social_needs,
+        'Stanger Friendly': catBreeds.stranger_friendly,
+        'Rarity': catBreeds.rare,
+      }
+    }
+
+    commit('setCurrentGachaCat', formedCatData)
     return response
+  },
+  saveMyCats({commit}, catData) {
+    commit('saveCat', catData)
   }
 }
 

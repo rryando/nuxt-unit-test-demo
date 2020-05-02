@@ -4,7 +4,7 @@
     <v-badge
       bordered
       color="error"
-      content="0"
+      :content="String(this.listOfMyCats.length)"
       overlap
       dark
       top
@@ -34,10 +34,9 @@
       />
     </v-card>
     <h2 class="mt-4"> {{ gachaTitle }} </h2>
-    <v-btn color="primary" class="mt-4" @click="gachaAction()">Gacha !!</v-btn>
-    <br />
+    <v-btn color="primary" class="mt-4" @click="gachaAction()" :disabled="isGachaIng">Gacha !!</v-btn>
     <v-fade-transition>
-      <v-btn v-if="flipAnimationDone" :disabled="isSaved" transition="fade-transition" color="lime" class="mt-4" @click="saveCat()">Save</v-btn>
+      <v-btn v-if="isFlipAnimationDone" :disabled="isSaved" transition="fade-transition" color="lime" class="mt-4" @click="saveCat()">Save</v-btn>
     </v-fade-transition>
   </div>
 </template>
@@ -48,43 +47,45 @@ import { mapGetters, mapActions } from 'vuex';
 export default {
   data: () => ({
     isFlipped: false,
-    flipAnimationDone: false,
+    isFlipAnimationDone: false,
     isSaved: false,
+    isGachaIng: false,
     gachaTitle: 'hayoo dapat apa...',
     defaultCardImg: '/cover.jpg',
     cardImg: '/cover.jpg'
   }),
   computed: {
     ...mapGetters({
-      getRandomedCat: 'gachacat/getRandomedCat'
+      getGachaedCat: 'gachacat/getGachaedCat',
+      listOfMyCats: 'gachacat/listOfMyCats'
     }),
   },
   methods: {
     ...mapActions({
-      fetchRandomCat: 'gachacat/fetchRandomCat'
+      fetchRandomCat: 'gachacat/fetchRandomCat',
+      saveMyCats: 'gachacat/saveMyCats'
     }),
     resetGachaState() {
-      this.flipAnimationDone = false
+      this.isFlipAnimationDone = false
       this.isFlipped = !this.isFlipped
       this.cardImg = this.defaultCardImg
+      this.isGachaIng = true;
       this.isSaved = false;
       this.gachaTitle = "prok prok prok.. dapat apaaa"
     },
-    gachaAction() {
+    setGachaResult() {
+      this.gachaTitle = ` JENG JENG JENG... ${this.getGachaedCat.name}`
+      this.cardImg = this.getGachaedCat.imgUrl
+      this.isFlipAnimationDone = true
+      this.isGachaIng = false
+    },
+    async gachaAction() {
       this.resetGachaState()
-      this.fetchRandomCat()
-
-      setTimeout(() => {  
-        this.gachaTitle = ` JENG JENG JENG... ${this.getRandomedCat.breeds[0].name}`
-        this.cardImg = this.getRandomedCat.url
-      }, 3000);
-      
-      setTimeout(() => {
-        this.flipAnimationDone = true
-      }, 5000);
+      await this.fetchRandomCat()
+      setTimeout(() => this.setGachaResult(), 3000)
     },
     saveCat() {
-      if (!this.isSaved) console.log('save action')
+      if (!this.isSaved) this.saveMyCats(this.getGachaedCat)
       this.isSaved = true
     }
   }

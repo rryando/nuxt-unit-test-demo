@@ -21,15 +21,15 @@
           <v-container fluid>
             <v-row>
               <v-col
-                v-for="n in 20"
-                :key="n"
+                v-for="(cat, index) in listOfMyCats"
+                :key="`catgrid-${index}`"
                 class="d-flex child-flex"
                 cols="4"
               >
-                <v-card flat tile class="d-flex" @click="showInfoPopup()">
+                <v-card flat tile class="d-flex" @click="showInfoPopup(cat)">
                   <v-img
-                    :src="currentInfo.imgUrl"
-                    :lazy-src="`https://picsum.photos/10/6?image=${n * 5 + 10}`"
+                    :src="cat.imgUrl"
+                    :lazy-src="cat.imgUrl"
                     aspect-ratio="1"
                     class="grey lighten-2"
                   >
@@ -57,7 +57,6 @@
         <v-img
           height="400"
           width="400"
-          contain
           :src="currentInfo.imgUrl"  
           class="mb-4"
         />
@@ -65,14 +64,9 @@
         <v-card-text>{{currentInfo.description}}</v-card-text>
         <v-simple-table height="300px">
           <template v-slot:default>
-            <!-- <thead>
-              <tr v-for="(item, key, index) in currentInfo.status" :key="key+index">
-                <th class="text-left">{{key}}</th>
-              </tr>
-            </thead> -->
             <tbody>
               <tr v-for="(item, key, index) in currentInfo.status" :key="item+index">
-                <td>{{ key }}</td>
+                <td class="text-left">{{ key }}</td>
                 <td>{{ item }}</td>
               </tr>
             </tbody>
@@ -97,6 +91,8 @@
   </div>
 </template>
 <script>
+import {mapGetters} from 'vuex'
+
 export default {
   data: () => ({
     showInfo: false,
@@ -114,6 +110,11 @@ export default {
     },
     currentInfo: {}
   }),
+  computed: {
+    ...mapGetters({
+      listOfMyCats: 'gachacat/listOfMyCats'
+    })
+  },
   mounted() {
     this.resetCurrentInfo()
   },
@@ -121,10 +122,10 @@ export default {
     resetCurrentInfo() {
       this.currentInfo = this.defaultCurrentInfo
     },
-    showInfoPopup() {
+    showInfoPopup(selectedCat) {
       this.resetCurrentInfo()
+      this.currentInfo = selectedCat
       this.showInfo = true
-      console.log('show')
     }
   }
 }
